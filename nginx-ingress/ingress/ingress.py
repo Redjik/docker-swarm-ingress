@@ -116,7 +116,7 @@ while True:
             'service_port': service_port,
             'service_name': service_name,
             'service_id': service_id,
-            'client_max_body_size': client_max_body_size
+            'client_max_body_size': client_max_body_size,
             'proxy_protocol': proxy_protocol
         }
 
