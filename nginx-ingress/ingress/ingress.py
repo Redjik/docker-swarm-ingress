@@ -69,6 +69,8 @@ while True:
         http_config = False
         https_config = False
         https_redirect = False
+
+        client_max_body_size = ''
         
         virtual_host = ''
         virtual_proto = 'http'
@@ -76,8 +78,17 @@ while True:
         service_port = 80
         service_name = ''
         service_id = service.get('ID','')
-        
+
+        proxy_protocol = False
+
         if service['Spec'].get('Labels'):
+
+            if service['Spec']['Labels'].get('ingress.proxy_protocol'):
+                proxy_protocol = True
+
+            if service['Spec']['Labels'].get('ingress.client_max_body_size'):
+                client_max_body_size = service['Spec']['Labels'].get('ingress.client_max_body_size')
+
             if service['Spec']['Labels'].get('ingress.host'):
                 http_config = True
                 virtual_host = service['Spec']['Labels'].get('ingress.host')
@@ -104,7 +115,9 @@ while True:
             'alt_virtual_host': alt_virtual_host,
             'service_port': service_port,
             'service_name': service_name,
-            'service_id': service_id
+            'service_id': service_id,
+            'client_max_body_size': client_max_body_size
+            'proxy_protocol': proxy_protocol
         }
 
         services_list.append(out)
@@ -126,7 +139,7 @@ while True:
         wait_for_dns_service(services_list)
         
         # Reload nginx with the new configuration
-        subprocess.call(['nginx', '-s', 'reload'])
+        subprocess.call(['n', '-s', 'reload'])
 
         if os.environ['DEBUG'] in ['true', 'yes', '1']:
             print(new_nginx_config)

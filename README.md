@@ -230,3 +230,12 @@ To use SSL bridging mode on our backend container we need to add the following l
 
 Client --> Nginx-Ingress (SSL) --> Backend (SSL)
 For a detailed example see examples/example-service-ssl-bridging.yml
+
+
+#### Build
+
+docker buildx build \                
+--push \
+--platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+--tag redjik/nginx-ingress:${VERSION} \
+.

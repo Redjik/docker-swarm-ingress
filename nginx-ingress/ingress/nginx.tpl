@@ -47,6 +47,16 @@ http {
     sendfile on;
     keepalive_timeout 65;
 
+    tcp_nodelay on;
+    server_tokens off;
+    fastcgi_buffers 8 16k;
+    fastcgi_buffer_size 32k;
+    fastcgi_read_timeout 120;
+    client_header_buffer_size 64k;
+    server_names_hash_max_size 768;
+
+    map_hash_bucket_size 128;
+
     # If we receive X-Forwarded-Proto, pass it through; otherwise, pass along the
     # scheme used to connect to this server
     map $http_x_forwarded_proto $proxy_x_forwarded_proto {
@@ -78,7 +88,10 @@ http {
         
     # HTTP 1.1 support
     proxy_http_version 1.1;
-    proxy_buffering off;
+    proxy_buffering on;
+    proxy_buffer_size   64k;
+    proxy_buffers   4 64k;
+    proxy_busy_buffers_size   64k;
     proxy_set_header Host $http_host;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $proxy_connection;
@@ -151,6 +164,10 @@ http {
     server {
         server_name {{ service['virtual_host'] }};
         listen 443 ssl http2 ;
+
+        {% if service['client_max_body_size'] != '' -%}
+        client_max_body_size {{ service['client_max_body_size'] }};
+        {% endif %}
         
         add_header X-Frame-Options "SAMEORIGIN";
         add_header X-Content-Type-Options "nosniff";
@@ -180,7 +197,11 @@ http {
     server {
         server_name {{ service['virtual_host'] }};
         listen 80 ;
-        
+
+        {% if service['client_max_body_size'] != '' -%}
+        client_max_body_size {{ service['client_max_body_size'] }};
+        {% endif %}
+
         charset utf-8;
         
         location / {
