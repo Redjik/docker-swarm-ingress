@@ -139,7 +139,7 @@ while True:
         wait_for_dns_service(services_list)
         
         # Reload nginx with the new configuration
-        subprocess.call(['n', '-s', 'reload'])
+        subprocess.call(['nginx', '-s', 'reload'])
 
         if os.environ['DEBUG'] in ['true', 'yes', '1']:
             print(new_nginx_config)
