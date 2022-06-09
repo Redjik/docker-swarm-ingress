@@ -157,7 +157,7 @@ http {
     {% if service['https_config'] and proxy_mode not in ['ssl-passthrough'] -%}
 
     # {{ service['virtual_host']  }} - {{  service['id'] }} - HTTPS ssl-termination/ssl-bridging
-    upstream upstream-https-{{ service['virtual_host'] }} {
+    upstream upstream-https-{{ service['service_name'] }} {
         server {{ service['service_name'] }}:{{ service['service_port']|default('80') }};
     }
 
@@ -184,13 +184,13 @@ http {
         location / {
             resolver 127.0.0.11;
             set $virtual_proto {{ service.virtual_proto }};
-            proxy_pass $virtual_proto://upstream-https-{{ service['virtual_host'] }};
+            proxy_pass $virtual_proto://upstream-https-{{ service['service_name'] }};
         }
     }
     {% elif service['http_config'] and not service['https_redirect'] -%}
 
     # {{ service['virtual_host'] }} - {{ service['service_id'] }} - HTTP
-    upstream upstream-{{ service['virtual_host'] }} {
+    upstream upstream-{{ service['service_name'] }} {
         server {{ service['service_name'] }}:{{ service['service_port']|default('80') }};
     }
 
@@ -207,7 +207,7 @@ http {
         location / {
             resolver 127.0.0.11;
             set $virtual_proto {{ service.virtual_proto }};
-            proxy_pass $virtual_proto://upstream-{{ service['virtual_host'] }};
+            proxy_pass $virtual_proto://upstream-{{ service['service_name'] }};
         }
     }
     {% endif -%}
