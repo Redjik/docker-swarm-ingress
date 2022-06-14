@@ -79,7 +79,7 @@ http {
     server_names_hash_bucket_size 128;
 
     # Set appropriate X-Forwarded-Ssl header based on $proxy_x_forwarded_proto
-        map $proxy_x_forwarded_proto $proxy_x_forwarded_ssl {
+    map $proxy_x_forwarded_proto $proxy_x_forwarded_ssl {
         default off;
         https on;
     }
@@ -104,8 +104,12 @@ http {
     proxy_set_header Proxy "";
 
     {% if request_id -%}
-    proxy_set_header Request-Id $request_id;
-    add_header Request-Id $request_id;
+    map $http_request_id $proxy_request_id {
+        default $request_id;
+        ~* $http_request_id;
+    }
+    proxy_set_header Request-Id $proxy_request_id;
+    add_header Request-Id $proxy_request_id;
     {% endif %}
 
     server {
