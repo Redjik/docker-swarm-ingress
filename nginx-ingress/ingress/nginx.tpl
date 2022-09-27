@@ -5,7 +5,7 @@ error_log /dev/fd/2 warn;
 pid /var/run/nginx.pid;
 
 events {
-    worker_connections  1024;
+    worker_connections  12288;
 }
 
 {% if proxy_mode == 'ssl-passthrough' -%}
@@ -17,7 +17,7 @@ stream {
         {% endif -%}
         {% endfor %}
     }
-  
+
     {% for service in services -%}
     {% if service['https_config'] and proxy_mode == 'ssl-passthrough' -%}
     # {{ service['virtual_host'] }} - {{ service['service_id'] }} - HTTPS Passthrough
@@ -27,7 +27,7 @@ stream {
     {% endif -%}
     {% endfor %}
     proxy_protocol on;
-  
+
     server {
         listen      443;
         proxy_pass  $name;
@@ -85,7 +85,7 @@ http {
     }
 
     gzip_types text/plain text/css application/javascript application/json application/x-javascript text/xml application/xml application/xml+rss text/javascript;
-        
+
     # HTTP 1.1 support
     proxy_http_version 1.1;
     proxy_buffering on;
@@ -122,21 +122,21 @@ http {
             index index.html;
         }
     }
-    
+
     {% if proxy_mode not in ['ssl-passthrough'] -%}
     server {
         server_name _;
         listen 443 ssl http2 ;
-        
+
         add_header X-Frame-Options "SAMEORIGIN";
         add_header X-Content-Type-Options "nosniff";
 
         charset utf-8;
 
-        # SSL Settings        
+        # SSL Settings
         ssl_certificate /etc/nginx/default.crt;
         ssl_certificate_key /etc/nginx/default.key;
-       
+
         include /etc/nginx/options-ssl-nginx.conf;
         ssl_dhparam /etc/nginx/ssl-dhparams.pem;
 
@@ -172,16 +172,16 @@ http {
         {% if service['client_max_body_size'] != '' -%}
         client_max_body_size {{ service['client_max_body_size'] }};
         {% endif %}
-        
+
         add_header X-Frame-Options "SAMEORIGIN";
         add_header X-Content-Type-Options "nosniff";
 
         charset utf-8;
 
-        # SSL Settings        
+        # SSL Settings
         ssl_certificate /run/secrets/{{ service['virtual_host'] }}.crt;
         ssl_certificate_key /run/secrets/{{ service['virtual_host'] }}.key;
-       
+
         include /etc/nginx/options-ssl-nginx.conf;
         ssl_dhparam /etc/nginx/ssl-dhparams.pem;
 
@@ -207,7 +207,7 @@ http {
         {% endif %}
 
         charset utf-8;
-        
+
         location / {
             resolver 127.0.0.11;
             set $virtual_proto {{ service.virtual_proto }};
